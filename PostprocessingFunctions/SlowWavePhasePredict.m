@@ -40,7 +40,7 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
     Mag = norm(Pred{1}(:, end)); 
     if (vars.currentPosition - vars.TriggerBuffer) > vars.LastStimPosition
         if Mag > EEG.Threshold
-            if (PredAngle < - 9 * pi/10 || PredAngle > 9 * pi/10)
+            if (PredAngle>=deg2rad(-60) && PredAngle<=deg2rad(-10))
                 PsychPortAudio('Start', vars.audio_port, vars.repetitions, vars.ChunkTime + vars.SlowWaveDelay, 0);
                 %sound(Sound, fsSound)
                 vars.StimTimes(vars.StimCount) = round(vars.currentPosition + vars.SlowWaveDelay * EEG.fs);
