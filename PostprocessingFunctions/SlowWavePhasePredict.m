@@ -53,13 +53,15 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
         if Mag > EEG.Threshold
             if (PredAngle>=deg2rad(-60) && PredAngle<=deg2rad(-10))
                 idx = (vars.currentPosition-EEG.fs*30-1):(vars.currentPosition-1);
-                if mean(envelope(EEG.Recording(idx,9), length(idx), 'rms')) < 80 % check for mov artifacts
-                    if mean(envelope(filter(b_delta, a_delta, EEG.Recording(idx,9)), length(idx), 'rms')) > 6 % check for delta
-                        PsychPortAudio('Start', vars.audio_port, vars.repetitions, vars.ChunkTime + vars.SlowWaveDelay, 0);
-                        %sound(Sound, fsSound)
-                        vars.StimTimes(vars.StimCount) = round(vars.currentPosition + vars.SlowWaveDelay * EEG.fs);
-                        vars.StimCount = vars.StimCount + 1;
-                        vars.LastStimPosition = vars.currentPosition;
+                if idx(1) >= 1
+                    if mean(envelope(EEG.Recording(idx,9), length(idx), 'rms')) < 80 % check for mov artifacts
+                        if mean(envelope(filter(b_delta, a_delta, EEG.Recording(idx,9)), length(idx), 'rms')) > 6 % check for delta
+                            PsychPortAudio('Start', vars.audio_port, vars.repetitions, vars.ChunkTime + vars.SlowWaveDelay, 0);
+                            %sound(Sound, fsSound)
+                            vars.StimTimes(vars.StimCount) = round(vars.currentPosition + vars.SlowWaveDelay * EEG.fs);
+                            vars.StimCount = vars.StimCount + 1;
+                            vars.LastStimPosition = vars.currentPosition;
+                        end
                     end
                 end
             end
