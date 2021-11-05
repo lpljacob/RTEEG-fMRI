@@ -5,7 +5,7 @@ function [vars, Graph, EEG] = SlowWavePhasePredict(EEG, vars, Graph)
 if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
     tic
     if ~isfield(vars, 'PhasePredictor')
-        load('10-26-2021 17-14results_Fpz_s02.mat', 'results');
+        load('11-05-2021 16-06results_Fpz_s02_54ms.mat', 'results');
         vars.PhasePredictor = resetState(results(1).net);
         vars.SlowWaveDelay = .000;
         vars.Angles = zeros(1000000, 1);
