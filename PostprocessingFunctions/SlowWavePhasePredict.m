@@ -1,9 +1,7 @@
 function [vars, Graph, EEG] = SlowWavePhasePredict(EEG, vars, Graph)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+% Predicts Fpz phase with no re-refef and deliver sound
 
 if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
-    tic
     if ~isfield(vars, 'PhasePredictor')
         load('11-05-2021 16-06results_Fpz_s02_54ms.mat', 'results');
         vars.PhasePredictor = resetState(results(1).net);
@@ -63,7 +61,6 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
                             vars.StimTimes(vars.StimCount) = round(vars.currentPosition + vars.SlowWaveDelay * EEG.fs);
                             vars.StimCount = vars.StimCount + 1;
                             vars.LastStimPosition = vars.currentPosition;
-                            toc
                         end
                     end
                 end
