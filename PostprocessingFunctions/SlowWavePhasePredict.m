@@ -3,7 +3,7 @@ function [vars, Graph, EEG] = SlowWavePhasePredict(EEG, vars, Graph)
 
 if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
     if ~isfield(vars, 'PhasePredictor')
-        load('11-05-2021 16-06results_Fpz_s02_54ms.mat', 'results');
+        load('10-26-2021 17-14results_Fpz_s02.mat', 'results');
         vars.PhasePredictor = resetState(results(1).net);
         vars.SlowWaveDelay = .000;
         vars.Angles = zeros(1000000, 1);
@@ -61,6 +61,8 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
                             vars.StimTimes(vars.StimCount) = round(vars.currentPosition + vars.SlowWaveDelay * EEG.fs);
                             vars.StimCount = vars.StimCount + 1;
                             vars.LastStimPosition = vars.currentPosition;
+                            toc
+                            disp(vars.StimCount)
                         end
                     end
                 end
@@ -68,4 +70,5 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
         end
     end
 end
+tic
 end
