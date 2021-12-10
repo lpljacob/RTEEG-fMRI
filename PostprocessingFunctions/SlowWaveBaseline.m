@@ -1,17 +1,23 @@
-function [vars, Graph, EEG] = SlowWavePhasePredict(EEG, vars, Graph)
-% Predicts Fpz phase with no re-refef and deliver sound
+function [vars, Graph, EEG] = SlowWaveBaseline(EEG, vars, Graph)
+% obtain baseline measures for slow wave stim
 
-if vars.SamplesInChunk > 0 
+if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
     if ~isfield(vars, 'PhasePredictor')
-        load('12-10-2021 14-20results_Fpz_2subs.mat', 'results');
+        load('10-26-2021 17-14results_Fpz_s02.mat', 'results');
         vars.PhasePredictor = resetState(results(1).net);
         vars.SlowWaveDelay = .000;
         vars.Angles = zeros(1000000, 1);
         vars.X = zeros(3, 1000000);
     end
     if ~isfield(vars, 'b_delta')
+        
         vars.delpthresh = 7; % must be higher than this value
         vars.movsthresh = 40; % must be lower than this value
+        
+        % vars for storing baseline values
+        vars.allMags = 0;
+        vars.alldelps = 0;
+        vars.allmovs = 0;
         
         delta_filter = designfilt('bandpassiir', ...
             'PassbandFrequency1', 1, ... 
@@ -23,7 +29,7 @@ if vars.SamplesInChunk > 0
             'PassbandRipple', 1, ...
             'DesignMethod', 'butter', ...
             'SampleRate', EEG.fs);
-        [vars.b_delta, vars.a_delta] = tf(delta_filter);
+        [vars.b_delta, vars.a_delta] = tf(delta_filter);  
         
         hp_filter = designfilt('highpassiir', ...
             'PassbandFrequency', 0.4, ... 
@@ -33,7 +39,7 @@ if vars.SamplesInChunk > 0
             'DesignMethod', 'butter', ...
             'SampleRate', EEG.fs);
         [vars.b_hp, vars.a_hp] = tf(hp_filter);
-        vars.zhp = zeros(6, 1); %filter initial conditions       
+        vars.zhp = zeros(6, 1); %filter initial conditions  
     end
     if ~vars.UseKalman
         if(vars.currentPosition - vars.SamplesInChunk)-1 <= 0
@@ -51,6 +57,7 @@ if vars.SamplesInChunk > 0
             sample =  EEG.Kalman_Signal((vars.currentPosition - vars.SamplesInChunk)-1:vars.currentPosition - 1, EEG.KalmanPrimary);
         end
     end
+    
     [sample, vars.zhp] = filter(vars.b_hp, vars.a_hp, sample(2:end), vars.zhp);
     sample = [0; sample];
     
@@ -65,18 +72,24 @@ if vars.SamplesInChunk > 0
 %     vars.Angles(vars.currentPosition - 1) = PredAngle;
  %   fprintf('hi: %f\n', PredAngle);     
     if (vars.currentPosition - vars.TriggerBuffer) > vars.LastStimPosition
+        
         Mag = norm(Pred{1}(:, end));
+        vars.allMags(end+1) = Mag;
+
         if Mag > EEG.Threshold
             if (PredAngle>=deg2rad(-60) && PredAngle<=deg2rad(-10))
                 idx = (vars.currentPosition-EEG.fs*30-1):(vars.currentPosition-1);
                 if idx(1) >= 1
-                    % check for mov artifacts, print result
+                    
+                    delp = mean(envelope(filter(vars.b_delta, vars.a_delta, EEG.Recording(idx,9)), length(idx), 'rms'))
+                    vars.alldelps(end+1) = delp;
+
                     movs = mean(envelope(EEG.Recording(idx,9), length(idx), 'rms'))
-                    if movs < vars.movsthresh 
-                        % check for delta, print result
-                        delp = mean(envelope(filter(vars.b_delta, vars.a_delta, EEG.Recording(idx,9)), length(idx), 'rms'))
+                    vars.allmovs(end+1) = movs;
+                    
+                    if movs < vars.movsthresh                      
                         if delp > vars.delpthresh 
-                            PsychPortAudio('Start', vars.audio_port, vars.repetitions, vars.ChunkTime + vars.SlowWaveDelay, 0);
+                            %PsychPortAudio('Start', vars.audio_port, vars.repetitions, vars.ChunkTime + vars.SlowWaveDelay, 0);
                             %sound(Sound, fsSound)
                             vars.StimTimes(vars.StimCount) = round(vars.currentPosition + vars.SlowWaveDelay * EEG.fs);
                             vars.StimCount = vars.StimCount + 1;
