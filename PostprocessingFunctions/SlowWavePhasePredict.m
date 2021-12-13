@@ -33,7 +33,7 @@ if vars.SamplesInChunk > 0
             'DesignMethod', 'butter', ...
             'SampleRate', EEG.fs);
         [vars.b_hp, vars.a_hp] = tf(hp_filter);
-        vars.zhp = zeros(6, 1); %filter initial conditions       
+        vars.zhp = zeros(2,1); %filter initial conditions       
     end
     if ~vars.UseKalman
         if(vars.currentPosition - vars.SamplesInChunk)-1 <= 0
@@ -71,10 +71,12 @@ if vars.SamplesInChunk > 0
                 idx = (vars.currentPosition-EEG.fs*30-1):(vars.currentPosition-1);
                 if idx(1) >= 1
                     % check for mov artifacts, print result
-                    movs = mean(envelope(EEG.Recording(idx,9), length(idx), 'rms'))
+                    movs = mean(envelope(EEG.Recording(idx,9), length(idx), 'rms'));
+                    disp('movs is ' + string(movs))
                     if movs < vars.movsthresh 
                         % check for delta, print result
-                        delp = mean(envelope(filter(vars.b_delta, vars.a_delta, EEG.Recording(idx,9)), length(idx), 'rms'))
+                        delp = mean(envelope(filter(vars.b_delta, vars.a_delta, EEG.Recording(idx,9)), length(idx), 'rms'));
+                        disp('delp is ' + string(delp))
                         if delp > vars.delpthresh 
                             PsychPortAudio('Start', vars.audio_port, vars.repetitions, vars.ChunkTime + vars.SlowWaveDelay, 0);
                             %sound(Sound, fsSound)
@@ -82,7 +84,7 @@ if vars.SamplesInChunk > 0
                             vars.StimCount = vars.StimCount + 1;
                             vars.LastStimPosition = vars.currentPosition;
                             toc
-                            disp(Mag)
+                            disp('Mag is ' + string(Mag))
                             disp(vars.StimCount)
                         end
                     end

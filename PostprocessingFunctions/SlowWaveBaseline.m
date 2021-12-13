@@ -3,7 +3,7 @@ function [vars, Graph, EEG] = SlowWaveBaseline(EEG, vars, Graph)
 
 if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
     if ~isfield(vars, 'PhasePredictor')
-        load('10-26-2021 17-14results_Fpz_s02.mat', 'results');
+        load('12-10-2021 14-20results_Fpz_2subs.mat', 'results');
         vars.PhasePredictor = resetState(results(1).net);
         vars.SlowWaveDelay = .000;
         vars.Angles = zeros(1000000, 1);
@@ -39,7 +39,7 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
             'DesignMethod', 'butter', ...
             'SampleRate', EEG.fs);
         [vars.b_hp, vars.a_hp] = tf(hp_filter);
-        vars.zhp = zeros(6, 1); %filter initial conditions  
+        vars.zhp = zeros(2,1); %filter initial conditions  
     end
     if ~vars.UseKalman
         if(vars.currentPosition - vars.SamplesInChunk)-1 <= 0
@@ -81,11 +81,13 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
                 idx = (vars.currentPosition-EEG.fs*30-1):(vars.currentPosition-1);
                 if idx(1) >= 1
                     
-                    delp = mean(envelope(filter(vars.b_delta, vars.a_delta, EEG.Recording(idx,9)), length(idx), 'rms'))
+                    delp = mean(envelope(filter(vars.b_delta, vars.a_delta, EEG.Recording(idx,9)), length(idx), 'rms'));
                     vars.alldelps(end+1) = delp;
 
-                    movs = mean(envelope(EEG.Recording(idx,9), length(idx), 'rms'))
+                    movs = mean(envelope(EEG.Recording(idx,9), length(idx), 'rms'));
                     vars.allmovs(end+1) = movs;
+                    
+                    disp('delp is ' + string(delp) + ' and movs is ' + string(movs))
                     
                     if movs < vars.movsthresh                      
                         if delp > vars.delpthresh 
@@ -95,7 +97,7 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
                             vars.StimCount = vars.StimCount + 1;
                             vars.LastStimPosition = vars.currentPosition;
                             toc
-                            disp(Mag)
+                            disp('Mag is ' + string(Mag))
                             disp(vars.StimCount)
                         end
                     end

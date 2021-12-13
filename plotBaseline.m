@@ -1,0 +1,6 @@
+figure()
+plot(EEG.vars.alldelps)
+figure()
+plot(EEG.vars.allmovs)
+figure()
+plot(EEG.vars.allMags)
