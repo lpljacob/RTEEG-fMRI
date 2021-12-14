@@ -13,6 +13,10 @@ if vars.SamplesInChunk > 0
         vars.delpthresh = 7; % must be higher than this value
         vars.movsthresh = 4; % must be lower than this value
         
+        vars.allMags = 0;
+        vars.alldelps = 0;
+        vars.allmovs = 0;
+        
         delta_filter = designfilt('bandpassiir', ...
             'PassbandFrequency1', 1, ... 
             'Passbandfrequency2', 4, ... 
@@ -75,18 +79,21 @@ if vars.SamplesInChunk > 0
  %   fprintf('hi: %f\n', PredAngle);     
     if (vars.currentPosition - vars.TriggerBuffer) > vars.LastStimPosition
         Mag = norm(Pred{1}(:, end));
+        vars.allMags(end+1) = Mag;
         if Mag > EEG.Threshold
             if (PredAngle>=deg2rad(-60) && PredAngle<=deg2rad(-10))
                 idx = (vars.currentPosition-EEG.fs*30-1):(vars.currentPosition-1);
                 if idx(1) >= 1
-                    % check for mov artifacts, print result
-                    movs = mean(envelope(filter(vars.b_mov, vars.a_mov, EEG.Recording(idx,9)), length(idx), 'rms'));
-                    disp('movs is ' + string(movs))
-                    if movs < vars.movsthresh 
-                        % check for delta, print result
-                        delp = mean(envelope(filter(vars.b_delta, vars.a_delta, EEG.Recording(idx,9)), length(idx), 'rms'));
-                        disp('delp is ' + string(delp))
-                        if delp > vars.delpthresh 
+                    % check for delta, print result
+                    delp = mean(envelope(filter(vars.b_delta, vars.a_delta, EEG.Recording(idx,9)), length(idx), 'rms'));
+                    vars.alldelps(end+1) = delp;
+                    disp('delp is ' + string(delp))                   
+                    if delp > vars.delpthresh
+                        % check for mov artifacts, print result
+                        movs = mean(envelope(filter(vars.b_mov, vars.a_mov, EEG.Recording(idx,9)), length(idx), 'rms'));
+                        vars.allmovs(end+1) = movs;
+                        disp('movs is ' + string(movs))
+                        if movs < vars.movsthresh
                             PsychPortAudio('Start', vars.audio_port, vars.repetitions, vars.ChunkTime + vars.SlowWaveDelay, 0);
                             %sound(Sound, fsSound)
                             vars.StimTimes(vars.StimCount) = round(vars.currentPosition + vars.SlowWaveDelay * EEG.fs);
