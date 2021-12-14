@@ -12,7 +12,7 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
     if ~isfield(vars, 'b_delta')
         
         vars.delpthresh = 7; % must be higher than this value
-        vars.movsthresh = 40; % must be lower than this value
+        vars.movsthresh = 4; % must be lower than this value
         
         % vars for storing baseline values
         vars.allMags = 0;
@@ -29,7 +29,16 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
             'PassbandRipple', 1, ...
             'DesignMethod', 'butter', ...
             'SampleRate', EEG.fs);
-        [vars.b_delta, vars.a_delta] = tf(delta_filter);  
+        [vars.b_delta, vars.a_delta] = tf(delta_filter);
+        
+        mov_filter = designfilt('highpassiir', ...
+            'PassbandFrequency',20, ... 
+            'StopbandFrequency', 5,...
+            'StopbandAttenuation', 30, ...
+            'PassbandRipple', 1, ...
+            'DesignMethod', 'butter', ...
+            'SampleRate', EEG_res);
+        [vars.b_mov, vars.a_mov] = tf(mov_filter);
         
         hp_filter = designfilt('highpassiir', ...
             'PassbandFrequency', 0.4, ... 
@@ -84,7 +93,7 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
                     delp = mean(envelope(filter(vars.b_delta, vars.a_delta, EEG.Recording(idx,9)), length(idx), 'rms'));
                     vars.alldelps(end+1) = delp;
 
-                    movs = mean(envelope(EEG.Recording(idx,9), length(idx), 'rms'));
+                    movs = mean(envelope(filter(vars.b_mov, vars.a_mov, EEG.Recording(idx,9)), length(idx), 'rms'));
                     vars.allmovs(end+1) = movs;
                     
                     disp('delp is ' + string(delp) + ' and movs is ' + string(movs))
