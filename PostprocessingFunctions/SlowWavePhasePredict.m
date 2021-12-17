@@ -3,7 +3,8 @@ function [vars, Graph, EEG] = SlowWavePhasePredict(EEG, vars, Graph)
 
 if vars.SamplesInChunk > 0 
     if ~isfield(vars, 'PhasePredictor')
-        load('12-10-2021 14-20results_Fpz_2subs.mat', 'results');
+        load('10-26-2021 17-14results_Fpz_s02.mat', 'results');
+        %load('12-10-2021 14-20results_Fpz_2subs.mat', 'results');
         vars.PhasePredictor = resetState(results(1).net);
         vars.SlowWaveDelay = .000;
         vars.Angles = zeros(1000000, 1);
@@ -64,8 +65,8 @@ if vars.SamplesInChunk > 0
             sample =  EEG.Kalman_Signal((vars.currentPosition - vars.SamplesInChunk)-1:vars.currentPosition - 1, EEG.KalmanPrimary);
         end
     end
-    [sample, vars.zhp] = filter(vars.b_hp, vars.a_hp, sample(2:end), vars.zhp);
-    sample = [0; sample];
+%     [sample, vars.zhp] = filter(vars.b_hp, vars.a_hp, sample(2:end), vars.zhp);
+%     sample = [0; sample];
     
     [FiltSample, vars.z] = filter(vars.b, vars.a, sample(2:end), vars.z); 
     X = zeros(3, length(sample) - 1, 1, 1);

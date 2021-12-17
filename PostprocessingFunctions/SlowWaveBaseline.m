@@ -67,8 +67,8 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
         end
     end
     
-    [sample, vars.zhp] = filter(vars.b_hp, vars.a_hp, sample(2:end), vars.zhp);
-    sample = [0; sample];
+%     [sample, vars.zhp] = filter(vars.b_hp, vars.a_hp, sample(2:end), vars.zhp);
+%     sample = [0; sample];
     
     [FiltSample, vars.z] = filter(vars.b, vars.a, sample(2:end), vars.z); 
     X = zeros(3, length(sample) - 1, 1, 1);
