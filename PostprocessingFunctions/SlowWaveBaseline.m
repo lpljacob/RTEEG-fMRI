@@ -3,7 +3,7 @@ function [vars, Graph, EEG] = SlowWaveBaseline(EEG, vars, Graph)
 
 if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
     if ~isfield(vars, 'PhasePredictor')
-        load('12-10-2021 14-20results_Fpz_2subs.mat', 'results');
+        load('12-17-2021 13-11results_Fpz_2subs_noHP.mat', 'results');
         vars.PhasePredictor = resetState(results(1).net);
         vars.SlowWaveDelay = .000;
         vars.Angles = zeros(1000000, 1);
@@ -14,7 +14,6 @@ if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
         vars.delpthresh = 7; % must be higher than this value
         vars.movsthresh = 4; % must be lower than this value
         
-        % vars for storing baseline values
         vars.allMags = 0;
         vars.alldelps = 0;
         vars.allmovs = 0;
