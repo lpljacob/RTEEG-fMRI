@@ -3,7 +3,7 @@ function [vars, Graph, EEG] = SlowWavePhasePredict(EEG, vars, Graph)
 
 if vars.SamplesInChunk > 0 
     if ~isfield(vars, 'PhasePredictor')
-        load('12-17-2021 13-11results_Fpz_2subs_noHP.mat', 'results');
+        load('03-08-2022 15-35results_Fpz_2subs_100delay.mat', 'results');
         vars.PhasePredictor = resetState(results(1).net);
         vars.SlowWaveDelay = .000;
         vars.Angles = zeros(1000000, 1);

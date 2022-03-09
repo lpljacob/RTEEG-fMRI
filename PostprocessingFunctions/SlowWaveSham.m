@@ -1,5 +1,6 @@
 function [vars, Graph, EEG] = SlowWaveSham(EEG, vars, Graph)
-% Predicts Fpz phase with no re-refef; does not deliver sound
+% Predicts Fpz phase with no re-refef; does not deliver sound;
+% OUTDATED!!!!!!!!!!!!!
 
 if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
     if ~isfield(vars, 'PhasePredictor')
