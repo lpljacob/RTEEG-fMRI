@@ -1,9 +1,17 @@
 function [vars, Graph, EEG] = SlowWaveBaseline(EEG, vars, Graph)
 % obtain baseline measures for slow wave stim
 
-if vars.SamplesInChunk > 0 %&& vars.UseSlowWaveStim
+if vars.SamplesInChunk > 0
     if ~isfield(vars, 'PhasePredictor')
-        load('03-08-2022 15-35results_Fpz_2subs_100delay.mat', 'results');
+        if EEG.PrimaryChannel == 17
+            fprintf('loading Fpz predictor...')
+            load('03-08-2022 15-35results_Fpz_2subs_100delay.mat', 'results');
+        elseif EEG.PrimaryChannel == 6
+            fprintf('loading C4 predictor...')
+            load('04-20-2022 12-33_C4_3subs_100ms.mat', 'results');
+        else
+            fprintf('WARNING! NO PREDICTOR FOR THIS CHANNEL')
+        end
         vars.PhasePredictor = resetState(results(1).net);
         vars.SlowWaveDelay = .000;
         vars.Angles = zeros(1000000, 1);
